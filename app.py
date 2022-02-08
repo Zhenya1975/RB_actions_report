@@ -122,6 +122,39 @@ def update_daterange(quarter_selector, year_selector):
 
     return update_daterange_p
 
+# Обработчик основной страницы - построения графика
+@app.callback([
+    Output('rb_actions_graph', 'figure'),
+],
+    [
+        Input('customer_actions_selector', 'value'),
+        #Input('year_selector', 'value'),
+
+    ],
+)
+def update_daterange(customer_actions_selector):
+  actions_df = pd.read_csv('data/actions_df_selected_by_quarter.csv')
+  action_df_groupped = actions_df.groupby(['created_at_date','Категория'], as_index=False).agg({'count': 'sum'})
+  action_df_groupped.to_csv('data/action_df_groupped_delete.csv')
+  calendar_actions_dates = actions_df.loc[actions_df['Категория'] == 'Календарь']
+  calendar_actions_graph_df = calendar_actions_dates.groupby(['created_at_date'], as_index=False).agg({'count': 'sum'})
+  calendar_actions_graph_df.to_csv('data/calendar_actions_graph_df_delete.csv')
+  calendar_actions_x = calendar_actions_graph_df['created_at_date']
+  calendar_actions_y = calendar_actions_graph_df['count']
+
+  fig = go.Figure()
+  fig.add_trace(go.Scatter(
+    
+    x = calendar_actions_x,
+    y=calendar_actions_y,
+    #hoverinfo='x+y',
+    mode='lines',
+    # line=dict(width=0.5, color='rgb(131, 90, 241)'),
+    stackgroup='one' # define stack group
+  ))
+
+  return [fig]
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    #app.run_server(debug=True)
+    app.run_server(host='0.0.0.0', debug=False)
