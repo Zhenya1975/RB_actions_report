@@ -9,68 +9,96 @@ def tab_rb_actions():
         # className='custom-tab',
         # selected_className='custom-tab--selected',
         children=[dbc.Row([
+            html.P(),
             dbc.Col(width=3,
                     children=[
                         html.Div(
                             children=[
+                                html.Div(
+                                    dbc.Accordion(
+                                        [
+                                            dbc.AccordionItem(
+                                                [
+                                                    html.Div(id='customers_div_checklist',
+                                                             children=[
+
+                                                                 # html.H4('КЛИЕНТЫ'),
+                                                                 dbc.Button("Выбрать все", size="sm",
+                                                                            id="select_all_customer_actions",
+                                                                            style={'marginBottom': '3px',
+                                                                                   'marginTop': '3px',
+                                                                                   'backgroundColor': '#232632'}
+                                                                            ),
+                                                                 dbc.Button("Снять выбор", color="secondary",
+                                                                            size="sm",
+                                                                            style={'marginBottom': '3px',
+                                                                                   'marginTop': '3px',
+                                                                                   'backgroundColor': '#232632'},
+                                                                            id="release_all_customer_actions"),
+
+                                                                 html.P(),
+                                                                 dcc.Checklist(
+                                                                     id='customer_actions_selector',
+                                                                     # options=regions,
+                                                                     # value=
+                                                                     labelStyle=dict(display='block')),
+                                                                 html.Hr(className="hr"),
+
+                                                             ],
+                                                             ),
+                                                ],
+
+                                                # title='КЛИЕНТЫ {}'.format(12),
+                                                title='КЛИЕНТЫ',
+                                                id="accordion_customers"
+                                            ),
+                                            dbc.AccordionItem(
+                                                [
+                                                    html.Div(id='deals_div_checklist',
+                                                             children=[
+
+                                                                 html.H4('СДЕЛКИ'),
+                                                                 dbc.Button("Выбрать все", size="sm",
+                                                                            id="select_all_deal_actions",
+                                                                            style={'marginBottom': '3px',
+                                                                                   'marginTop': '3px',
+                                                                                   'backgroundColor': '#232632'}
+                                                                            ),
+                                                                 dbc.Button("Снять выбор", color="secondary",
+                                                                            size="sm",
+                                                                            style={'marginBottom': '3px',
+                                                                                   'marginTop': '3px',
+                                                                                   'backgroundColor': '#232632'},
+                                                                            id="release_all_deal_actions"),
+
+                                                                 html.P(),
+                                                                 dcc.Checklist(
+                                                                     id='deal_actions_selector',
+                                                                     # options=regions,
+                                                                     # value=
+                                                                     labelStyle=dict(display='block')),
+                                                                 html.Hr(className="hr"),
+
+                                                             ],
+                                                             ),
+                                                ],
+                                                # title="СДЕЛКИ",
+                                                id="accordion_deals"
+                                            ),
+                                            dbc.AccordionItem(
+                                                "This is the content of the third section",
+                                                title="Item 3",
+                                            ),
+                                        ],
+                                        start_collapsed=True,
+                                    )
+                                ),
                                 html.Div(style={'marginLeft': '3px'},
                                          children=[
                                              html.P(),
-                                             html.Div(id='customers_div_checklist',
-                                                      children=[
 
-                                                          html.H4('КЛИЕНТЫ'),
-                                                          dbc.Button("Выбрать все", size="sm",
-                                                                     id="select_all_customer_actions",
-                                                                     style={'marginBottom': '3px',
-                                                                            'marginTop': '3px',
-                                                                            'backgroundColor': '#232632'}
-                                                                     ),
-                                                          dbc.Button("Снять выбор", color="secondary",
-                                                                     size="sm",
-                                                                     style={'marginBottom': '3px',
-                                                                            'marginTop': '3px',
-                                                                            'backgroundColor': '#232632'},
-                                                                     id="release_all_customer_actions"),
 
-                                                          html.P(),
-                                                          dcc.Checklist(
-                                                              id='customer_actions_selector',
-                                                              # options=regions,
-                                                              # value=
-                                                              labelStyle=dict(display='block')),
-                                                          html.Hr(className="hr"),
 
-                                                      ],
-                                                      ),
-                                             html.Div(id='deals_div_checklist',
-                                                      children=[
-
-                                                          html.H4('СДЕЛКИ'),
-                                                          dbc.Button("Выбрать все", size="sm",
-                                                                     id="select_all_deal_actions",
-                                                                     style={'marginBottom': '3px',
-                                                                            'marginTop': '3px',
-                                                                            'backgroundColor': '#232632'}
-                                                                     ),
-                                                          dbc.Button("Снять выбор", color="secondary",
-                                                                     size="sm",
-                                                                     style={'marginBottom': '3px',
-                                                                            'marginTop': '3px',
-                                                                            'backgroundColor': '#232632'},
-                                                                     id="release_all_deal_actions"),
-
-                                                          html.P(),
-                                                          dcc.Checklist(
-                                                              id='deal_actions_selector',
-                                                              # options=regions,
-                                                              # value=
-                                                              labelStyle=dict(display='block')),
-                                                          html.Hr(className="hr"),
-
-                                                      ],
-                                                      ),
-                                             
                                          ]
                                          ),
 

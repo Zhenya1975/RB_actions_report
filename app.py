@@ -21,6 +21,9 @@ template_theme2 = "darkly"
 url_theme1 = dbc.themes.FLATLY
 url_theme2 = dbc.themes.DARKLY
 
+available_graph_templates: ['ggplot2', 'seaborn', 'simple_white', 'plotly', 'plotly_white', 'plotly_dark',
+                            'presentation', 'xgridoff', 'ygridoff', 'gridon', 'none']
+
 templates = [
     "bootstrap",
     "minty",
@@ -71,6 +74,7 @@ app.layout = dbc.Container(
                             # parent_className='custom-tabs',
                             # className='custom-tabs-container',
                             children=[
+
                                 tab_rb_actions.tab_rb_actions(),
                                 tab_settings.tab_settings(),
                                 # tab2(),
@@ -128,6 +132,8 @@ def update_daterange_callback_func(quarter_selector, year_selector):
     Output("customer_actions_selector", "options"),
     Output("deal_actions_selector", "value"),
     Output("deal_actions_selector", "options"),
+    Output("accordion_customers", "title"),
+    Output("accordion_deals", "title"),
     Output('rb_actions_graph', 'figure'),
 
 ],
@@ -142,7 +148,8 @@ def update_daterange_callback_func(quarter_selector, year_selector):
 
     ],
 )
-def actions_page(theme_selector, customer_actions_selector, select_all_customer_actions, release_all_customer_actions, deal_actions_selector):
+def actions_page(theme_selector, customer_actions_selector, select_all_customer_actions, release_all_customer_actions,
+                 deal_actions_selector):
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
     if theme_selector:
         graph_template = 'seaborn'
@@ -186,14 +193,15 @@ def actions_page(theme_selector, customer_actions_selector, select_all_customer_
     actions_df = actions_df.loc[(actions_df['action_template_id'].isin(customer_actions_selector_value)) |
                                 (actions_df['action_template_id'].isin(deal_actions_selector_value))
 
-    ]
+                                ]
     print('длина датафрейма после применения фильтров', len(actions_df))
 
     fig_actions = go.Figure()
 
     ################## ГРАФИК КЛИЕНТЫ ###########################
     actions_customers_df = actions_df.loc[(actions_df['action_category'] == 'сustomer')]
-    print('длина датафрейма customer в графике', len(actions_customers_df))
+    # print('длина датафрейма customer в графике', len(actions_customers_df))
+    number_of_customers_actions = actions_customers_df['count'].sum()
     customer_actions_graph_df = actions_customers_df.groupby(['created_at_date'], as_index=False).agg({'count': 'sum'})
     actions_x = customer_actions_graph_df['created_at_date']
     actions_customer_y = customer_actions_graph_df['count']
@@ -212,7 +220,8 @@ def actions_page(theme_selector, customer_actions_selector, select_all_customer_
     )
     ################## ГРАФИК СДЕЛКИ ###########################
     actions_deals_df = actions_df.loc[actions_df['action_category'] == 'deal']
-    print('длина датафрейма deals в графике', len(actions_deals_df))
+    # print('длина датафрейма deals в графике', len(actions_deals_df))
+    number_of_deals_actions = actions_deals_df['count'].sum()
     deals_actions_graph_df = actions_deals_df.groupby(['created_at_date'], as_index=False).agg({'count': 'sum'})
     actions_x = deals_actions_graph_df['created_at_date']
     actions_deal_y = deals_actions_graph_df['count']
@@ -265,14 +274,19 @@ def actions_page(theme_selector, customer_actions_selector, select_all_customer_
     ))
     fig_actions.update_layout(
         template=graph_template,
+        title_text='Действия пользователей, кол-во',
+    )
+    fig_actions.update_xaxes(
+        showgrid=False,
+        # ticklabelmode="period"
     )
 
     customer_actions_selector_options = checklist_customers_options_full_list
     deal_actions_selector_options = checklist_deals_options_full_list
     # print('deal_actions_selector_options', deal_actions_selector_options)
-
-
-    return customer_actions_selector_value, customer_actions_selector_options, deal_actions_selector_value, deal_actions_selector_options, fig_actions
+    accordion_customers_title = 'КЛИЕНТЫ {}'.format(str(number_of_customers_actions))
+    accordion_deals_title = 'СДЕЛКИ {}'.format(str(number_of_deals_actions))
+    return customer_actions_selector_value, customer_actions_selector_options, deal_actions_selector_value, deal_actions_selector_options, accordion_customers_title, accordion_deals_title, fig_actions
 
 
 if __name__ == "__main__":
