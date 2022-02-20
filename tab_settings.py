@@ -94,7 +94,7 @@ def tab_settings():
                                              'marginTop': '3px',
                                              'backgroundColor': '#232632'}
                                       ), href='/'),
-                    # html.A(html.Button('Refresh Page'), href='/'),
+
 
                     # dcc.Upload(dbc.Button("Загрузить файл", color="secondary",
                     #                       size="md",

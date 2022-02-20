@@ -38,7 +38,7 @@ def tab_rb_actions():
                                                           dcc.Checklist(
                                                               id='customer_actions_selector',
                                                               # options=regions,
-                                                              # value=regions_list,
+                                                              # value=
                                                               labelStyle=dict(display='block')),
                                                           html.Hr(className="hr"),
 

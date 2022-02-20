@@ -2,6 +2,8 @@ from datetime import date
 from calendar import monthrange
 import datetime
 
+import pandas as pd
+
 
 def cut_df_by_dates_interval(df, date_field_name, start_date, end_date):
     """Выборка в диапазоне дат. Пример: date_field_name: 'close_date',  start_date, end_date - в формате
@@ -13,6 +15,7 @@ def cut_df_by_dates_interval(df, date_field_name, start_date, end_date):
     between_two_dates = after_start_date & before_end_date
     result_df = df.loc[between_two_dates]
     return result_df
+
 
 def quarter_important_days(quarter_number, year):
     """quarter_important_days() получает на вход номер квартала и год. 4 и 2021. На выходе отдает первый день и
@@ -54,3 +57,19 @@ def quarter_days(quarter_selector_value, year_selector_value):
         first_day_of_selection = quarter_important_days(requested_quarter, requested_year)[0]
         last_day_of_selection = quarter_important_days(requested_quarter, requested_year)[1]
     return first_day_of_selection, last_day_of_selection
+
+
+def action_checklist_data(action_category):
+    """Подготовка чек-листа с категориями действий в разделе Клиенты"""
+    action_categories_df = pd.read_csv('data/action_categories.csv')
+    action_categories_filtered_by_category_df = action_categories_df.loc[
+        action_categories_df['action_category'] == action_category]
+    customer_categories_checklist_data = []
+    customer_categories_list = []
+    for index, row in action_categories_filtered_by_category_df.iterrows():
+        dict_temp = {}
+        dict_temp['label'] = " " + row['action']
+        dict_temp['value'] = row['action_template_id']
+        customer_categories_checklist_data.append(dict_temp)
+        customer_categories_list.append(row['action_template_id'])
+    return customer_categories_checklist_data, customer_categories_list

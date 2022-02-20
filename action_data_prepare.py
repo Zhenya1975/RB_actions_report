@@ -2,6 +2,7 @@ import pandas as pd
 import datetime
 
 def load_actions_data():
+    '''получение датасета raw_action_data_with_categories'''
     #origin_csv_file_location = '/Users/evgenijzupanik/Downloads/rb_bmtechnics_ru.csv'
 
     #chunk = pd.read_csv(origin_csv_file_location, chunksize=100000)

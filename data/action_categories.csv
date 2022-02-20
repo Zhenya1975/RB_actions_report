@@ -27,7 +27,6 @@ action_template_id,subject_class,context_class,Категория,action_categor
 71,Contact,Contact,Клиент. Сотрудник,contact,изменил данные контакта
 72,CompanyEntity,CompanyEntity,Клиент. Организация,сustomer,создал нового контрагента
 74,CompanyEntity,CompanyEntity,Клиент. Организация,сustomer,изменил данные контрагента
-76,Company,CompanyEntity,Клиент. Организация,сustomer,изменил данные контрагента
 83,Deal,Deal,Сделка,deal,отложил сделку
 84,Deal,Deal,Сделка,deal,активировал сделку
 85,Deal,Deal,Сделка,deal,"изменил значение в поле ""Дата контрактации"""
