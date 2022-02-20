@@ -2,8 +2,8 @@ action_template_id,subject_class,context_class,Категория,action_categor
 1,Address,Company,Клиент. Организация,сustomer,создал новый адрес
 3,Comment,Deal,Сделка,deal,создал новый комментарий в сделке
 4,Company,Company,Клиент. Организация,сustomer,создал компанию
-6,Contact,Company,Клиент. Сотрудник,contact,создал новый контакт
-7,Contact,Company,Клиент. Сотрудник,contact,удалил контакт
+6,Contact,Company,Клиент. Сотрудник,сustomer,создал новый контакт
+7,Contact,Company,Клиент. Сотрудник,сustomer,удалил контакт
 9,Deal,Deal,Сделка,deal,создал новую сделку
 12,Deal,Deal,Сделка,deal,выиграл сделку
 13,Deal,Deal,Сделка,deal,проиграл сделку
@@ -24,7 +24,7 @@ action_template_id,subject_class,context_class,Категория,action_categor
 65,Company,Company,Клиент. Организация,сustomer,изменил наименование компании.
 66,Company,Company,Клиент. Организация,сustomer,изменил электронную почту компании
 69,ModelPropertyValue,Company,Клиент. Организация,сustomer,изменил данные в дополнительных полях
-71,Contact,Contact,Клиент. Сотрудник,contact,изменил данные контакта
+71,Contact,Contact,Клиент. Сотрудник,сustomer,изменил данные контакта
 72,CompanyEntity,CompanyEntity,Клиент. Организация,сustomer,создал нового контрагента
 74,CompanyEntity,CompanyEntity,Клиент. Организация,сustomer,изменил данные контрагента
 83,Deal,Deal,Сделка,deal,отложил сделку

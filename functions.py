@@ -59,17 +59,21 @@ def quarter_days(quarter_selector_value, year_selector_value):
     return first_day_of_selection, last_day_of_selection
 
 
-def action_checklist_data(action_category):
+def action_checklist_data(actions_df, action_category):
     """Подготовка чек-листа с категориями действий в разделе Клиенты"""
     action_categories_df = pd.read_csv('data/action_categories.csv')
+    action_categories_list = actions_df['action_category'].unique()
+    # print('action_categories_list', action_categories_list)
+    action_categories_df = action_categories_df.loc[action_categories_df['action_category'].isin(action_categories_list)]
     action_categories_filtered_by_category_df = action_categories_df.loc[
         action_categories_df['action_category'] == action_category]
-    customer_categories_checklist_data = []
-    customer_categories_list = []
+    category_actions_checklist_data = []
+    category_actions_list = []
     for index, row in action_categories_filtered_by_category_df.iterrows():
         dict_temp = {}
         dict_temp['label'] = " " + row['action']
         dict_temp['value'] = row['action_template_id']
-        customer_categories_checklist_data.append(dict_temp)
-        customer_categories_list.append(row['action_template_id'])
-    return customer_categories_checklist_data, customer_categories_list
+        category_actions_checklist_data.append(dict_temp)
+        category_actions_list.append(row['action_template_id'])
+    # print(customer_categories_checklist_data)
+    return category_actions_checklist_data, category_actions_list
