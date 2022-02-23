@@ -11,6 +11,7 @@ import tab_rb_actions
 import tab_settings
 import action_data_prepare
 import functions
+import actions_table
 import json
 
 # select the Bootstrap stylesheet2 and figure template2 for the theme toggle here:
@@ -60,7 +61,8 @@ app.layout = dbc.Container(
             dbc.Col(
                 [
                     html.H4("ОТЧЕТЫ", className="bg-primary text-white p-4 mb-2"),
-                    ThemeSwitchAIO(aio_id="theme", themes=[url_theme1, url_theme2], ),
+                    ThemeSwitchAIO(aio_id="theme", themes=[url_theme1, url_theme2]),
+                    # ThemeSwitchAIO(aio_id="theme", themes=[url_theme2, url_theme1]),
 
                     html.Div([
                         dcc.Tabs(
@@ -134,10 +136,14 @@ def update_daterange_callback_func(quarter_selector, year_selector):
     Output("deal_actions_selector", "options"),
     Output("calendar_actions_selector", "value"),
     Output("calendar_actions_selector", "options"),
+    Output("fleet_actions_selector", "value"),
+    Output("fleet_actions_selector", "options"),
     Output("accordion_customers", "title"),
     Output("accordion_deals", "title"),
     Output("accordion_calendar", "title"),
+    Output("accordion_fleet", "title"),
     Output('rb_actions_graph', 'figure'),
+    Output('user_actions_table', 'children'),
 
 ],
     [
@@ -151,14 +157,19 @@ def update_daterange_callback_func(quarter_selector, year_selector):
         Input('calendar_actions_selector', 'value'),
         Input('select_all_calendar_actions', 'n_clicks'),
         Input('release_all_calendar_actions', 'n_clicks'),
+        Input('fleet_actions_selector', 'value'),
+        Input('select_all_fleet_actions', 'n_clicks'),
+        Input('release_all_fleet_actions', 'n_clicks'),
 
         # Input('year_selector', 'value'),
 
     ],
 )
 def actions_page(theme_selector, customer_actions_selector, select_all_customer_actions, release_all_customer_actions,
-                 deal_actions_selector, select_all_deal_actions, release_all_deal_actions, calendar_actions_selector, select_all_calendar_actions, release_all_calendar_actions):
+                 deal_actions_selector, select_all_deal_actions, release_all_deal_actions, calendar_actions_selector, select_all_calendar_actions, release_all_calendar_actions, fleet_actions_selector, select_all_fleet_actions, release_all_fleet_actions):
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
+    print('theme_selector', theme_selector)
+    print('ThemeSwitchAIO.ids.switch("theme")', ThemeSwitchAIO.ids.switch("theme"))
     if theme_selector:
         graph_template = 'seaborn'
         # bootstrap
@@ -227,16 +238,45 @@ def actions_page(theme_selector, customer_actions_selector, select_all_customer_
     elif id_release_all_calendar_actions_button in changed_id:
         calendar_actions_selector_value = []
 
+    ############ ЧЕК-ЛИСТ ДЕЙСТВИЙ В РАЗДЕЛЕ ПАРК ТЕХНИКИ ##########################################
+    checklist_fleet_options_full_list = functions.action_checklist_data(actions_df, 'fleet')[0]
+    checklist_fleet_values_full_list = functions.action_checklist_data(actions_df, 'fleet')[1]
+
+    if fleet_actions_selector is None:
+        fleet_actions_selector_value = checklist_fleet_values_full_list
+    else:
+        fleet_actions_selector_value = fleet_actions_selector
+
+    # Обработчик кнопок Снять / Выбрать в блоке Парк техники
+    id_select_all_fleet_actions_button = "select_all_fleet_actions"
+    id_release_all_fleet_actions_button = "release_all_fleet_actions"
+
+    # при клике на кнопку Выбрать все - выбираем все и наоборот
+    if id_select_all_fleet_actions_button in changed_id:
+        fleet_actions_selector_value = checklist_fleet_values_full_list
+    elif id_release_all_fleet_actions_button in changed_id:
+        fleet_actions_selector_value = []
+
 
     ############# ПРИМЕНЕНИЕ ФИЛЬТРОВ ######################
     actions_df = actions_df.loc[(actions_df['action_template_id'].isin(customer_actions_selector_value)) |
                                 (actions_df['action_template_id'].isin(deal_actions_selector_value)) |
-                                (actions_df['action_template_id'].isin(calendar_actions_selector_value))
-
+                                (actions_df['action_template_id'].isin(calendar_actions_selector_value)) |
+                                (actions_df['action_template_id'].isin(fleet_actions_selector_value))
                                 ]
     # print('длина датафрейма после применения фильтров', len(actions_df))
 
     fig_actions = go.Figure()
+    fig_actions.update_layout(
+        title="Действия пользователей, кол-во",
+
+        legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=1.02,
+        xanchor="right",
+        x=1
+    ))
 
     ################## ГРАФИК КЛИЕНТЫ ###########################
     actions_customers_df = actions_df.loc[(actions_df['action_category'] == 'сustomer')]
@@ -307,14 +347,15 @@ def actions_page(theme_selector, customer_actions_selector, select_all_customer_
         showlegend=True,
     )
     ################## ГРАФИК ПАРК ТЕХНИКИ ###########################
-    actions_customers_df = actions_df.loc[actions_df['action_category'] == 'fleet']
-    customer_actions_graph_df = actions_customers_df.groupby(['created_at_date'], as_index=False).agg({'count': 'sum'})
-    actions_x = customer_actions_graph_df['created_at_date']
-    actions_calendar_y = customer_actions_graph_df['count']
+    actions_fleet_df = actions_df.loc[actions_df['action_category'] == 'fleet']
+    number_of_fleet_actions = actions_fleet_df['count'].sum()
+    fleet_actions_graph_df = actions_fleet_df.groupby(['created_at_date'], as_index=False).agg({'count': 'sum'})
+    actions_x = fleet_actions_graph_df['created_at_date']
+    actions_fleet_y = fleet_actions_graph_df['count']
     fig_actions.add_trace(go.Scatter(
 
         x=actions_x,
-        y=actions_calendar_y,
+        y=actions_fleet_y,
         name='Парк техники',
         # hoverinfo='x+y',
         mode='lines',
@@ -323,7 +364,8 @@ def actions_page(theme_selector, customer_actions_selector, select_all_customer_
     ))
     fig_actions.update_layout(
         template=graph_template,
-        title_text='Действия пользователей, кол-во',
+        showlegend=True,
+        # title_text='Действия пользователей, кол-во',
     )
     fig_actions.update_xaxes(
         showgrid=False,
@@ -332,14 +374,17 @@ def actions_page(theme_selector, customer_actions_selector, select_all_customer_
 
     customer_actions_selector_options = checklist_customers_options_full_list
     deal_actions_selector_options = checklist_deals_options_full_list
-
     calendar_actions_selector_options = checklist_calendar_options_full_list
-    # print('deal_actions_selector_options', deal_actions_selector_options)
+    fleet_actions_selector_options = checklist_fleet_options_full_list
+
     accordion_customers_title = 'КЛИЕНТЫ {}'.format(str(number_of_customers_actions))
     accordion_deals_title = 'СДЕЛКИ {}'.format(str(number_of_deals_actions))
-    accordion_calendar_title = 'КАЛЕНДАРЬ {}'.format(str(number_of_calendar_actions ))
+    accordion_calendar_title = 'КАЛЕНДАРЬ {}'.format(str(number_of_calendar_actions))
+    accordion_fleet_title = 'ПАРК ТЕХНИКИ {}'.format(str(number_of_fleet_actions))
 
-    return customer_actions_selector_value, customer_actions_selector_options, deal_actions_selector_value, deal_actions_selector_options, calendar_actions_selector_value, calendar_actions_selector_options, accordion_customers_title, accordion_deals_title, accordion_calendar_title, fig_actions
+    actions_table_html = actions_table.actions_table(actions_df)
+
+    return customer_actions_selector_value, customer_actions_selector_options, deal_actions_selector_value, deal_actions_selector_options, calendar_actions_selector_value, calendar_actions_selector_options, fleet_actions_selector_value, fleet_actions_selector_options, accordion_customers_title, accordion_deals_title, accordion_calendar_title, accordion_fleet_title, fig_actions, actions_table_html
 
 
 if __name__ == "__main__":

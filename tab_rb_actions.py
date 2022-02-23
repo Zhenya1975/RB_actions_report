@@ -1,5 +1,6 @@
 from dash import dcc, html
 import dash_bootstrap_components as dbc
+import datetime
 
 
 def tab_rb_actions():
@@ -119,6 +120,38 @@ def tab_rb_actions():
                                                 # title="СДЕЛКИ",
                                                 id="accordion_calendar"
                                             ),
+                                            dbc.AccordionItem(
+                                                [
+                                                    html.Div(id='fleet_div_checklist',
+                                                             children=[
+
+                                                                 dbc.Button("Выбрать все", size="sm",
+                                                                            id="select_all_fleet_actions",
+                                                                            style={'marginBottom': '3px',
+                                                                                   'marginTop': '3px',
+                                                                                   'backgroundColor': '#232632'}
+                                                                            ),
+                                                                 dbc.Button("Снять выбор", color="secondary",
+                                                                            size="sm",
+                                                                            style={'marginBottom': '3px',
+                                                                                   'marginTop': '3px',
+                                                                                   'backgroundColor': '#232632'},
+                                                                            id="release_all_fleet_actions"),
+
+                                                                 html.P(),
+                                                                 dcc.Checklist(
+                                                                     id='fleet_actions_selector',
+                                                                     # options=regions,
+                                                                     # value=
+                                                                     labelStyle=dict(display='block')),
+                                                                 html.Hr(className="hr"),
+
+                                                             ],
+                                                             ),
+                                                ],
+                                                # title="ПАРК ТЕХНИКИ",
+                                                id="accordion_fleet"
+                                            ),
                                         ],
                                         start_collapsed=True,
                                     )
@@ -138,9 +171,24 @@ def tab_rb_actions():
                     ),
             dbc.Col(width=9,
                     children=[
+                        html.Div([
+                            dcc.DatePickerRange(
+                                id='my-date-picker-range',
+                                first_day_of_week=1,
+                                # min_date_allowed=date(1995, 8, 5),
+                                # max_date_allowed=datetime.datetime.now().date(),
+                                initial_visible_month=datetime.datetime.now().date(),
+                                # start_date = datetime.datetime.now().date(),
+                                # start_date=datetime.datetime.strptime("01.11.2021", "%d.%m.%Y").date(),
+                                # end_date=datetime.datetime.now().date(),
+                                # end_date=datetime.datetime.strptime("31.12.2021", "%d.%m.%Y").date(),
+                                display_format='DD.MM.YYYY',
+                            ), ]),
                         html.Div(dcc.Graph(id="rb_actions_graph", config={'displayModeBar': False}),
                                  className="m-4"),
                         html.P(),
+                        html.P(),
+                        html.Div(id='user_actions_table'),
                         # html.Div([
                         #     dcc.Tabs(
                         #         id="tabs-meetings-tables",
