@@ -57,7 +57,7 @@ def tab_rb_actions():
                                                     html.Div(id='deals_div_checklist',
                                                              children=[
 
-                                                                 html.H4('СДЕЛКИ'),
+                                                                 # html.H4('СДЕЛКИ'),
                                                                  dbc.Button("Выбрать все", size="sm",
                                                                             id="select_all_deal_actions",
                                                                             style={'marginBottom': '3px',
@@ -85,9 +85,39 @@ def tab_rb_actions():
                                                 # title="СДЕЛКИ",
                                                 id="accordion_deals"
                                             ),
+
                                             dbc.AccordionItem(
-                                                "This is the content of the third section",
-                                                title="Item 3",
+                                                [
+                                                    html.Div(id='calendar_div_checklist',
+                                                             children=[
+
+
+                                                                 dbc.Button("Выбрать все", size="sm",
+                                                                            id="select_all_calendar_actions",
+                                                                            style={'marginBottom': '3px',
+                                                                                   'marginTop': '3px',
+                                                                                   'backgroundColor': '#232632'}
+                                                                            ),
+                                                                 dbc.Button("Снять выбор", color="secondary",
+                                                                            size="sm",
+                                                                            style={'marginBottom': '3px',
+                                                                                   'marginTop': '3px',
+                                                                                   'backgroundColor': '#232632'},
+                                                                            id="release_all_calendar_actions"),
+
+                                                                 html.P(),
+                                                                 dcc.Checklist(
+                                                                     id='calendar_actions_selector',
+                                                                     # options=regions,
+                                                                     # value=
+                                                                     labelStyle=dict(display='block')),
+                                                                 html.Hr(className="hr"),
+
+                                                             ],
+                                                             ),
+                                                ],
+                                                # title="СДЕЛКИ",
+                                                id="accordion_calendar"
                                             ),
                                         ],
                                         start_collapsed=True,

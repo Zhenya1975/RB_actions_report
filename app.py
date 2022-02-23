@@ -132,8 +132,11 @@ def update_daterange_callback_func(quarter_selector, year_selector):
     Output("customer_actions_selector", "options"),
     Output("deal_actions_selector", "value"),
     Output("deal_actions_selector", "options"),
+    Output("calendar_actions_selector", "value"),
+    Output("calendar_actions_selector", "options"),
     Output("accordion_customers", "title"),
     Output("accordion_deals", "title"),
+    Output("accordion_calendar", "title"),
     Output('rb_actions_graph', 'figure'),
 
 ],
@@ -143,13 +146,18 @@ def update_daterange_callback_func(quarter_selector, year_selector):
         Input('select_all_customer_actions', 'n_clicks'),
         Input('release_all_customer_actions', 'n_clicks'),
         Input('deal_actions_selector', 'value'),
+        Input('select_all_deal_actions', 'n_clicks'),
+        Input('release_all_deal_actions', 'n_clicks'),
+        Input('calendar_actions_selector', 'value'),
+        Input('select_all_calendar_actions', 'n_clicks'),
+        Input('release_all_calendar_actions', 'n_clicks'),
 
         # Input('year_selector', 'value'),
 
     ],
 )
 def actions_page(theme_selector, customer_actions_selector, select_all_customer_actions, release_all_customer_actions,
-                 deal_actions_selector):
+                 deal_actions_selector, select_all_deal_actions, release_all_deal_actions, calendar_actions_selector, select_all_calendar_actions, release_all_calendar_actions):
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
     if theme_selector:
         graph_template = 'seaborn'
@@ -189,12 +197,44 @@ def actions_page(theme_selector, customer_actions_selector, select_all_customer_
     else:
         deal_actions_selector_value = deal_actions_selector
 
+    # Обработчик кнопок Снять / Выбрать в блоке Сделки
+    id_select_all_deals_actions_button = "select_all_deal_actions"
+    id_release_all_deals_actions_button = "release_all_deal_actions"
+
+    # при клике на кнопку Выбрать все - выбираем все и наоборот
+    if id_select_all_deals_actions_button in changed_id:
+        deal_actions_selector_value = checklist_deals_values_full_list
+    elif id_release_all_deals_actions_button in changed_id:
+        deal_actions_selector_value = []
+
+    ############ ЧЕК-ЛИСТ ДЕЙСТВИЙ В РАЗДЕЛЕ КАЛЕНДАРЬ ##########################################
+    checklist_calendar_options_full_list = functions.action_checklist_data(actions_df, 'calendar')[0]
+    checklist_calendar_values_full_list = functions.action_checklist_data(actions_df, 'calendar')[1]
+    # print('checklist_deals_values_full_list', checklist_deals_values_full_list)
+
+    if calendar_actions_selector is None:
+        calendar_actions_selector_value = checklist_calendar_values_full_list
+    else:
+        calendar_actions_selector_value = calendar_actions_selector
+
+    # Обработчик кнопок Снять / Выбрать в блоке Календарь
+    id_select_all_calendar_actions_button = "select_all_calendar_actions"
+    id_release_all_calendar_actions_button = "release_all_calendar_actions"
+
+    # при клике на кнопку Выбрать все - выбираем все и наоборот
+    if id_select_all_calendar_actions_button in changed_id:
+        calendar_actions_selector_value = checklist_calendar_values_full_list
+    elif id_release_all_calendar_actions_button in changed_id:
+        calendar_actions_selector_value = []
+
+
     ############# ПРИМЕНЕНИЕ ФИЛЬТРОВ ######################
     actions_df = actions_df.loc[(actions_df['action_template_id'].isin(customer_actions_selector_value)) |
-                                (actions_df['action_template_id'].isin(deal_actions_selector_value))
+                                (actions_df['action_template_id'].isin(deal_actions_selector_value)) |
+                                (actions_df['action_template_id'].isin(calendar_actions_selector_value))
 
                                 ]
-    print('длина датафрейма после применения фильтров', len(actions_df))
+    # print('длина датафрейма после применения фильтров', len(actions_df))
 
     fig_actions = go.Figure()
 
@@ -205,6 +245,7 @@ def actions_page(theme_selector, customer_actions_selector, select_all_customer_
     customer_actions_graph_df = actions_customers_df.groupby(['created_at_date'], as_index=False).agg({'count': 'sum'})
     actions_x = customer_actions_graph_df['created_at_date']
     actions_customer_y = customer_actions_graph_df['count']
+
     fig_actions.add_trace(go.Scatter(
 
         x=actions_x,
@@ -213,37 +254,43 @@ def actions_page(theme_selector, customer_actions_selector, select_all_customer_
         # hoverinfo='x+y',
         mode='lines',
         # line=dict(width=0.5, color='rgb(131, 90, 241)'),
+        legendrank=1,
         stackgroup='one'  # define stack group
     ))
     fig_actions.update_layout(
         template=graph_template,
+        showlegend=True,
     )
     ################## ГРАФИК СДЕЛКИ ###########################
     actions_deals_df = actions_df.loc[actions_df['action_category'] == 'deal']
-    # print('длина датафрейма deals в графике', len(actions_deals_df))
+
     number_of_deals_actions = actions_deals_df['count'].sum()
     deals_actions_graph_df = actions_deals_df.groupby(['created_at_date'], as_index=False).agg({'count': 'sum'})
     actions_x = deals_actions_graph_df['created_at_date']
     actions_deal_y = deals_actions_graph_df['count']
-    fig_actions.add_trace(go.Scatter(
 
+    fig_actions.add_trace(go.Scatter(
         x=actions_x,
         y=actions_deal_y,
         name='Сделки',
         # hoverinfo='x+y',
         mode='lines',
         # line=dict(width=0.5, color='rgb(131, 90, 241)'),
+        legendrank=2,
         stackgroup='one'  # define stack group
     ))
     fig_actions.update_layout(
         template=graph_template,
+        showlegend=True,
     )
 
     ################## ГРАФИК КАЛЕНДАРЬ ###########################
-    actions_customers_df = actions_df.loc[actions_df['action_category'] == 'calendar']
-    customer_actions_graph_df = actions_customers_df.groupby(['created_at_date'], as_index=False).agg({'count': 'sum'})
-    actions_x = customer_actions_graph_df['created_at_date']
-    actions_calendar_y = customer_actions_graph_df['count']
+    actions_calendar_df = actions_df.loc[actions_df['action_category'] == 'calendar']
+    number_of_calendar_actions = actions_calendar_df['count'].sum()
+    calendar_actions_graph_df = actions_calendar_df.groupby(['created_at_date'], as_index=False).agg({'count': 'sum'})
+    actions_x = calendar_actions_graph_df['created_at_date']
+    actions_calendar_y = calendar_actions_graph_df['count']
+
     fig_actions.add_trace(go.Scatter(
 
         x=actions_x,
@@ -251,11 +298,13 @@ def actions_page(theme_selector, customer_actions_selector, select_all_customer_
         name='Календарь',
         # hoverinfo='x+y',
         mode='lines',
+        legendrank=3,
         # line=dict(width=0.5, color='rgb(131, 90, 241)'),
         stackgroup='one'  # define stack group
     ))
     fig_actions.update_layout(
         template=graph_template,
+        showlegend=True,
     )
     ################## ГРАФИК ПАРК ТЕХНИКИ ###########################
     actions_customers_df = actions_df.loc[actions_df['action_category'] == 'fleet']
@@ -283,10 +332,14 @@ def actions_page(theme_selector, customer_actions_selector, select_all_customer_
 
     customer_actions_selector_options = checklist_customers_options_full_list
     deal_actions_selector_options = checklist_deals_options_full_list
+
+    calendar_actions_selector_options = checklist_calendar_options_full_list
     # print('deal_actions_selector_options', deal_actions_selector_options)
     accordion_customers_title = 'КЛИЕНТЫ {}'.format(str(number_of_customers_actions))
     accordion_deals_title = 'СДЕЛКИ {}'.format(str(number_of_deals_actions))
-    return customer_actions_selector_value, customer_actions_selector_options, deal_actions_selector_value, deal_actions_selector_options, accordion_customers_title, accordion_deals_title, fig_actions
+    accordion_calendar_title = 'КАЛЕНДАРЬ {}'.format(str(number_of_calendar_actions ))
+
+    return customer_actions_selector_value, customer_actions_selector_options, deal_actions_selector_value, deal_actions_selector_options, calendar_actions_selector_value, calendar_actions_selector_options, accordion_customers_title, accordion_deals_title, accordion_calendar_title, fig_actions
 
 
 if __name__ == "__main__":
