@@ -70,23 +70,3 @@ def load_actions_data(raw_df, quarter_selector, year_selector):
     return actions_df_selected_by_quarter
 
 
-
-
-
-
-
-
-# load_actions_data()
-
-# python action_data_prepare.py
-action_categories = pd.read_csv('data/action_categories.csv')
-df_2021_2022 = pd.read_csv('data/2021_2022_actions.csv')
-# джойним данные со списком категорий
-raw_action_data_with_categories = pd.merge(df_2021_2022, action_categories, on='action_template_id', how='left')
-# удаляем строки, которые не прошли
-raw_action_data_with_categories.dropna(subset=['Категория'], inplace=True)
-
-# raw_action_data_with_categories.head(1000).to_csv('data/raw_action_data_with_categories.head(1000)_delete.csv')
-
-
-# python action_data_prepare.py

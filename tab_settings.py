@@ -2,7 +2,10 @@ from dash import dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
 import initial_values
 import datetime
-
+loading_style = {
+    # 'position': 'absolute',
+    # 'align-self': 'center'
+                 }
 
 def tab_settings():
     tab_settings_block = dcc.Tab(
@@ -11,6 +14,34 @@ def tab_settings():
         # className='custom-tab',
         # selected_className='custom-tab--selected',
         children=[dbc.Row([
+            html.Div(
+                children=[
+                    dcc.Loading(id='loading', parent_style=loading_style),
+                    dbc.Alert(
+
+                        id="alert-success",
+                        # dismissable=True,
+                        color="success",
+                        # is_open=False,
+                        duration=4000,
+
+                        style={"marginLeft": 5, "marginRight": 5, "marginTop": 5}
+
+                    ),
+                    dbc.Alert(
+
+                        id="alert-danger",
+                        # dismissable=True,
+                        # is_open=False,
+                        duration=4000,
+                        color="danger",
+                        style={"marginLeft": 5, "marginRight": 5, "marginTop": 5}
+
+                    ),
+                ],
+
+
+            ),
 
             dbc.Col(
                 # width=3,
@@ -104,7 +135,6 @@ def tab_settings():
                                id="update_dataset_btn"
 
                                )
-
 
                     # dcc.Upload(dbc.Button("Загрузить файл", color="secondary",
                     #                       size="md",

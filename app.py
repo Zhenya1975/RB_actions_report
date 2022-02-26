@@ -25,6 +25,11 @@ url_theme2 = dbc.themes.DARKLY
 available_graph_templates: ['ggplot2', 'seaborn', 'simple_white', 'plotly', 'plotly_white', 'plotly_dark',
                             'presentation', 'xgridoff', 'ygridoff', 'gridon', 'none']
 
+loading_style = {
+    # 'position': 'absolute',
+                 # 'align-self': 'center'
+                 }
+
 templates = [
     "bootstrap",
     "minty",
@@ -94,7 +99,6 @@ app.layout = dbc.Container(
 )
 
 
-
 # Обработчик основной страницы - построения графика
 @app.callback([
     Output("customer_actions_selector", "value"),
@@ -111,6 +115,12 @@ app.layout = dbc.Container(
     Output("accordion_fleet", "title"),
     Output('rb_actions_graph', 'figure'),
     Output('user_actions_table', 'children'),
+    Output('alert-success', 'children'),
+    Output('alert-success', 'is_open'),
+    Output('alert-danger', 'children'),
+    Output('alert-danger', 'is_open'),
+    Output('input_csv_url', 'value'),
+    Output('loading', 'parent_style')
 
 ],
     [
@@ -136,29 +146,51 @@ app.layout = dbc.Container(
 
     ],
 )
-def actions_page(theme_selector, update_dataset, quarter_selector, year_selector, input_csv_url, customer_actions_selector, select_all_customer_actions,
+def actions_page(theme_selector, update_dataset, quarter_selector, year_selector, input_csv_url,
+                 customer_actions_selector, select_all_customer_actions,
                  release_all_customer_actions,
                  deal_actions_selector, select_all_deal_actions, release_all_deal_actions, calendar_actions_selector,
                  select_all_calendar_actions, release_all_calendar_actions, fleet_actions_selector,
                  select_all_fleet_actions, release_all_fleet_actions):
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
 
+    alert_success_text = ""
+    alert_success_is_open = False
+    alert_danger_text = ""
+    alert_danger_is_open = False
     actions_df = pd.read_csv('data/actions_df_selected_by_quarter.csv')
+
+    # читаем файл с дефолтными фильтрами
+    # Opening JSON file
+    with open('saved_data.json', 'r') as openfile:
+        # Reading from json file
+        saved_data_dict = json.load(openfile)
+    input_url = saved_data_dict["data_url"]
+
     if theme_selector:
         graph_template = 'seaborn'
         # bootstrap
 
     else:
         graph_template = 'plotly_dark'
-
+    raw_df = pd.read_csv('data/2021_2022_actions.csv')
     if "update_dataset_btn" in changed_id:
-        if input_csv_url == None:
-            raw_df = pd.read_csv('data/2021_2022_actions.csv')
-        else:
-            raw_df = pd.read_csv(input_csv_url)
+        if input_csv_url != None:
+            try:
+                raw_df = pd.read_csv(input_csv_url)
+                alert_success_text = "Данные обновлены"
+                alert_success_is_open = True
+                saved_data_dict["data_url"] = input_csv_url
+                with open("saved_data.json", "w") as jsonFile:
+                    json.dump(saved_data_dict, jsonFile)
+            except FileNotFoundError:
+                # print("нет файла по ссылке")
+                alert_danger_text = "Данные из файла по ссылке не обновлены"
+                alert_danger_is_open = True
+            except Exception as e:
+                print(e)
+
         actions_df = action_data_prepare.load_actions_data(raw_df, quarter_selector, year_selector)
-
-
 
     # actions_df = pd.read_csv(input_csv_url)
     # if input_csv_url == None:
@@ -371,7 +403,9 @@ def actions_page(theme_selector, update_dataset, quarter_selector, year_selector
 
     actions_table_html = actions_table.actions_table(actions_df)
 
-    return customer_actions_selector_value, customer_actions_selector_options, deal_actions_selector_value, deal_actions_selector_options, calendar_actions_selector_value, calendar_actions_selector_options, fleet_actions_selector_value, fleet_actions_selector_options, accordion_customers_title, accordion_deals_title, accordion_calendar_title, accordion_fleet_title, fig_actions, actions_table_html
+    input_csv_url_output = input_url
+    new_loading_style = loading_style
+    return customer_actions_selector_value, customer_actions_selector_options, deal_actions_selector_value, deal_actions_selector_options, calendar_actions_selector_value, calendar_actions_selector_options, fleet_actions_selector_value, fleet_actions_selector_options, accordion_customers_title, accordion_deals_title, accordion_calendar_title, accordion_fleet_title, fig_actions, actions_table_html, alert_success_text, alert_success_is_open, alert_danger_text, alert_danger_is_open, input_csv_url_output, new_loading_style
 
 
 if __name__ == "__main__":
