@@ -22,6 +22,9 @@ def tab_settings():
                     # визитов', 'value': 'include_plan_fact_meetings'}, ], value='include_all_meetings',
                     # labelStyle=dict(display='block'), ), html.Hr(),
                     html.P(),
+                    dbc.Label("URL файла с данными о действиях пользователей"),
+                    dbc.Input(id="input_csv_url", type="text"),
+                    html.P(),
                     html.P("Период отчета"),
                     # ряд, в котором лежат дроплисты с годом и кварталом
                     dbc.Row([
@@ -89,11 +92,18 @@ def tab_settings():
                     #         end_date=datetime.datetime.strptime("31.12.2021", "%d.%m.%Y").date(),
                     #         display_format='D.M.YYYY',
                     #     ), ]),
-                    html.A(dbc.Button("Обновить", size="sm",
-                                      style={'marginBottom': '3px',
-                                             'marginTop': '3px',
-                                             'backgroundColor': '#232632'}
-                                      ), href='/'),
+                    # html.A(dbc.Button("Обновить", size="sm",
+                    #                   style={'marginBottom': '3px',
+                    #                          'marginTop': '3px',
+                    #                          'backgroundColor': '#232632'}
+                    #                   ), href='/'),
+                    dbc.Button("Обновить", size="sm",
+                               style={'marginBottom': '3px',
+                                      'marginTop': '3px',
+                                      'backgroundColor': '#232632'},
+                               id="update_dataset_btn"
+
+                               )
 
 
                     # dcc.Upload(dbc.Button("Загрузить файл", color="secondary",

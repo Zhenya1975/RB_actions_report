@@ -94,39 +94,6 @@ app.layout = dbc.Container(
 )
 
 
-# Обработчик выбора квартала и года в настройках - выбор диапазона данных из основного файла.
-# Возвращает заглушку - по сути переписывая csv файл actions_df_selected_by_quarter
-@app.callback([
-    Output('update_daterange', 'children'),
-],
-    [
-        Input('quarter_selector', 'value'),
-        Input('year_selector', 'value'),
-
-    ],
-)
-def update_daterange_callback_func(quarter_selector, year_selector):
-    changed_id = [p['prop_id'] for p in callback_context.triggered][0]
-    raw_dataset = action_data_prepare.load_actions_data()
-    # raw_dataset = pd.read_csv('data/2020_2021_actions.csv')
-    # из вкладки Настройки берем значение из селектов "Квартал" и "Год" и получаем из них первый и последний день
-    # выборки
-
-    first_day_of_selection = functions.quarter_days(quarter_selector, year_selector)[0]
-    last_day_of_selection = functions.quarter_days(quarter_selector, year_selector)[1]
-
-    # print('first_day_of_selection', first_day_of_selection)
-
-    actions_df_selected_by_quarter = functions.cut_df_by_dates_interval(raw_dataset, 'created_at_date',
-                                                                        first_day_of_selection,
-                                                                        last_day_of_selection)
-
-    actions_df_selected_by_quarter.to_csv('data/actions_df_selected_by_quarter.csv')
-
-    update_daterange_p = [""]
-
-    return update_daterange_p
-
 
 # Обработчик основной страницы - построения графика
 @app.callback([
@@ -148,6 +115,10 @@ def update_daterange_callback_func(quarter_selector, year_selector):
 ],
     [
         Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
+        Input('update_dataset_btn', 'n_clicks'),
+        Input('quarter_selector', 'value'),
+        Input('year_selector', 'value'),
+        Input('input_csv_url', 'value'),
         Input('customer_actions_selector', 'value'),
         Input('select_all_customer_actions', 'n_clicks'),
         Input('release_all_customer_actions', 'n_clicks'),
@@ -165,11 +136,14 @@ def update_daterange_callback_func(quarter_selector, year_selector):
 
     ],
 )
-def actions_page(theme_selector, customer_actions_selector, select_all_customer_actions, release_all_customer_actions,
-                 deal_actions_selector, select_all_deal_actions, release_all_deal_actions, calendar_actions_selector, select_all_calendar_actions, release_all_calendar_actions, fleet_actions_selector, select_all_fleet_actions, release_all_fleet_actions):
+def actions_page(theme_selector, update_dataset, quarter_selector, year_selector, input_csv_url, customer_actions_selector, select_all_customer_actions,
+                 release_all_customer_actions,
+                 deal_actions_selector, select_all_deal_actions, release_all_deal_actions, calendar_actions_selector,
+                 select_all_calendar_actions, release_all_calendar_actions, fleet_actions_selector,
+                 select_all_fleet_actions, release_all_fleet_actions):
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
-    print('theme_selector', theme_selector)
-    print('ThemeSwitchAIO.ids.switch("theme")', ThemeSwitchAIO.ids.switch("theme"))
+
+    actions_df = pd.read_csv('data/actions_df_selected_by_quarter.csv')
     if theme_selector:
         graph_template = 'seaborn'
         # bootstrap
@@ -177,7 +151,21 @@ def actions_page(theme_selector, customer_actions_selector, select_all_customer_
     else:
         graph_template = 'plotly_dark'
 
-    actions_df = pd.read_csv('data/actions_df_selected_by_quarter.csv')
+    if "update_dataset_btn" in changed_id:
+        if input_csv_url == None:
+            raw_df = pd.read_csv('data/2021_2022_actions.csv')
+        else:
+            raw_df = pd.read_csv(input_csv_url)
+        actions_df = action_data_prepare.load_actions_data(raw_df, quarter_selector, year_selector)
+
+
+
+    # actions_df = pd.read_csv(input_csv_url)
+    # if input_csv_url == None:
+    #     actions_df = pd.read_csv('data/actions_df_selected_by_quarter.csv')
+    # else:
+    #     actions_df = pd.read_csv(input_csv_url)
+    # pd.read_csv('data/actions_df_selected_by_quarter.csv')
     # action_df_groupped = actions_df.groupby(['created_at_date', 'Категория'], as_index=False).agg({'count': 'sum'})
 
     ############ ЧЕК-ЛИСТ ДЕЙСТВИЙ В РАЗДЕЛЕ КЛИЕНТЫ #############################################
@@ -257,7 +245,6 @@ def actions_page(theme_selector, customer_actions_selector, select_all_customer_
     elif id_release_all_fleet_actions_button in changed_id:
         fleet_actions_selector_value = []
 
-
     ############# ПРИМЕНЕНИЕ ФИЛЬТРОВ ######################
     actions_df = actions_df.loc[(actions_df['action_template_id'].isin(customer_actions_selector_value)) |
                                 (actions_df['action_template_id'].isin(deal_actions_selector_value)) |
@@ -271,12 +258,12 @@ def actions_page(theme_selector, customer_actions_selector, select_all_customer_
         title="Действия пользователей, кол-во",
 
         legend=dict(
-        orientation="h",
-        yanchor="bottom",
-        y=1.02,
-        xanchor="right",
-        x=1
-    ))
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ))
 
     ################## ГРАФИК КЛИЕНТЫ ###########################
     actions_customers_df = actions_df.loc[(actions_df['action_category'] == 'сustomer')]

@@ -1,7 +1,8 @@
 import pandas as pd
 import datetime
+import functions
 
-def load_actions_data():
+def load_actions_data(raw_df, quarter_selector, year_selector):
     '''получение датасета raw_action_data_with_categories'''
     #origin_csv_file_location = '/Users/evgenijzupanik/Downloads/rb_bmtechnics_ru.csv'
 
@@ -42,7 +43,7 @@ def load_actions_data():
     # получаем список категорий
     action_categories = pd.read_csv('data/action_categories.csv')
     
-    df_2021_2022 = pd.read_csv('data/2021_2022_actions.csv')
+    df_2021_2022 = raw_df
 
     #  даты - в даты
     date_column_list = ['created_at_date']
@@ -51,8 +52,6 @@ def load_actions_data():
       df_2021_2022.loc[:, date_column] = pd.to_datetime(df_2021_2022[date_column], infer_datetime_format=True, #format='%d.%m.%Y')
       format='&Y-%m-%d')
       df_2021_2022.loc[:, date_column] = df_2021_2022.loc[:, date_column].apply(lambda x: datetime.date(x.year,x.month, x.day))
-    
-
 
     # джойним данные со списком категорий
     raw_action_data_with_categories = pd.merge(df_2021_2022, action_categories, on='action_template_id', how='left')
@@ -60,8 +59,21 @@ def load_actions_data():
     raw_action_data_with_categories.dropna(subset=['Категория'], inplace=True)
     raw_action_data_with_categories['count'] = 1
     # raw_action_data_with_categories.head(1000).to_csv('data/raw_action_data_with_categories.head(1000)_delete.csv')
-    
-    return raw_action_data_with_categories
+    raw_dataset = raw_action_data_with_categories
+    first_day_of_selection = functions.quarter_days(quarter_selector, year_selector)[0]
+    last_day_of_selection = functions.quarter_days(quarter_selector, year_selector)[1]
+    actions_df_selected_by_quarter = functions.cut_df_by_dates_interval(raw_dataset, 'created_at_date',
+                                                                        first_day_of_selection,
+                                                                        last_day_of_selection)
+    actions_df_selected_by_quarter.to_csv('data/actions_df_selected_by_quarter.csv')
+
+    return actions_df_selected_by_quarter
+
+
+
+
+
+
 
 
 # load_actions_data()
