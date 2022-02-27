@@ -53,7 +53,7 @@ def tab_settings():
                     # визитов', 'value': 'include_plan_fact_meetings'}, ], value='include_all_meetings',
                     # labelStyle=dict(display='block'), ), html.Hr(),
                     html.P(),
-                    dbc.Label("URL файла с данными о действиях пользователей"),
+                    dbc.Label(id="csv_url_label"),
                     dbc.Input(id="input_csv_url", type="text"),
                     html.P(),
                     html.P("Период отчета"),

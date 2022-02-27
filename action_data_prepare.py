@@ -65,7 +65,7 @@ def load_actions_data(raw_df, quarter_selector, year_selector):
     actions_df_selected_by_quarter = functions.cut_df_by_dates_interval(raw_dataset, 'created_at_date',
                                                                         first_day_of_selection,
                                                                         last_day_of_selection)
-
+    print(first_day_of_selection)
     # actions_df_selected_by_quarter = actions_df_selected_by_quarter.loc[actions_df_selected_by_quarter['subject_class'] != 'DealActualStagePoint']
     actions_df_selected_by_quarter.to_csv('data/actions_df_selected_by_quarter.csv')
 

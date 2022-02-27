@@ -119,7 +119,7 @@ app.layout = dbc.Container(
     Output('alert-success', 'is_open'),
     Output('alert-danger', 'children'),
     Output('alert-danger', 'is_open'),
-    Output('input_csv_url', 'value'),
+    Output('csv_url_label', 'children'),
     Output('loading', 'parent_style')
 
 ],
@@ -165,7 +165,7 @@ def actions_page(theme_selector, update_dataset, quarter_selector, year_selector
     with open('saved_data.json', 'r') as openfile:
         # Reading from json file
         saved_data_dict = json.load(openfile)
-    input_url = saved_data_dict["data_url"]
+    csv_url_label_text = saved_data_dict["data_url"]
 
     if theme_selector:
         graph_template = 'seaborn'
@@ -403,9 +403,9 @@ def actions_page(theme_selector, update_dataset, quarter_selector, year_selector
 
     actions_table_html = actions_table.actions_table(actions_df)
 
-    input_csv_url_output = input_url
+    csv_url_label_output = "URL файла с данными о действиях пользователей: {}".format(csv_url_label_text)
     new_loading_style = loading_style
-    return customer_actions_selector_value, customer_actions_selector_options, deal_actions_selector_value, deal_actions_selector_options, calendar_actions_selector_value, calendar_actions_selector_options, fleet_actions_selector_value, fleet_actions_selector_options, accordion_customers_title, accordion_deals_title, accordion_calendar_title, accordion_fleet_title, fig_actions, actions_table_html, alert_success_text, alert_success_is_open, alert_danger_text, alert_danger_is_open, input_csv_url_output, new_loading_style
+    return customer_actions_selector_value, customer_actions_selector_options, deal_actions_selector_value, deal_actions_selector_options, calendar_actions_selector_value, calendar_actions_selector_options, fleet_actions_selector_value, fleet_actions_selector_options, accordion_customers_title, accordion_deals_title, accordion_calendar_title, accordion_fleet_title, fig_actions, actions_table_html, alert_success_text, alert_success_is_open, alert_danger_text, alert_danger_is_open, csv_url_label_output, new_loading_style
 
 
 if __name__ == "__main__":
